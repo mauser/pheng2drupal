@@ -57,7 +57,7 @@ function importPhengUser( $link )
 function importPhengComments( $link )
 {
 	mysqli_query($link, "delete from comments where cid > 5");
-	$ergebnis = mysqli_query($link, "SELECT *  FROM pheng_posts");
+	$ergebnis = mysqli_query($link, "SELECT *  FROM pheng_posts ORDER BY id ASC");
 	while($daten = mysqli_fetch_assoc($ergebnis)) {
 
     		$d = $daten["post_date"];
@@ -65,9 +65,8 @@ function importPhengComments( $link )
 
 		$res = mysqli_query($link, "SELECT subject,minid  FROM pheng_threads WHERE id='" . $daten["thread"] ."' LIMIT 1");
 		$vid_row = mysqli_fetch_row($res);
-		#$subject = $vid_row[0];
-
 		$subject =  mysqli_real_escape_string($link, $vid_row[0] );
+
 		$minid = $vid_row[1];
 	
 		if( $minid == $daten["id"])
@@ -84,20 +83,28 @@ function importPhengComments( $link )
 		$sql = "SELECT nid  FROM node_revisions WHERE title = '" . $subject . "'";
    		$res =  mysqli_query($link,$sql);
 		if( $res ){
-			 
       			#echo "Erfolgreiches SELECT.";
    		} else {
     			echo "SELECT gescheitert.";
     			echo $link->error;
     			exit();
 		}
-
 		$vid_row = mysqli_fetch_row($res);
 		$nid = $vid_row[0];
 		if( $nid == 0){
 			print $sql;
 		}
 
+		$sql = "SELECT nid  FROM comments WHERE nid='" . $nid . "'";
+		$res = mysqli_query($link, $sql);
+			
+		$i=1;
+		while( $rows = mysqli_fetch_array($res)){
+			$i++;
+		}
+		$thread = str_pad($i, 2, "0", STR_PAD_LEFT). "/"; 	
+
+	
 		$res = mysqli_query($link, "SELECT uid  FROM users WHERE name='" . $daten["poster"] ."'");
 		$vid_row = mysqli_fetch_row($res);
 		$uid = $vid_row[0];
@@ -105,7 +112,7 @@ function importPhengComments( $link )
 
    		#print "<br>$name";    
  		#//echo "<br />Website: ".$daten["website"];
-    		$sql = "INSERT INTO comments VALUES('','0','" .  $nid . "','" . $uid . " ','" . $subject . "','". $comment ."','127.0.0.1','" . $timestamp . "','0','1','01/','" . $name . "','mail','homepage')"; 
+    		$sql = "INSERT INTO comments VALUES('','0','" .  $nid . "','" . $uid . " ','" . $subject . "','". $comment ."','127.0.0.1','" . $timestamp . "','0','1','". $thread . "','" . $name . "','mail','homepage')"; 
 
    		#print $sql;
 
@@ -244,7 +251,7 @@ function importPhengPosts( $link )
 
 
 #importPhengUser( $link );
-importPhengPosts( $link );
+#importPhengPosts( $link );
 importPhengComments( $link );
 
 
