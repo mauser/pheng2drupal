@@ -72,7 +72,7 @@ function importPhengComments( $link )
 	
 		if( $minid == $daten["id"])
 		{
-			print "breaking here, same id!";
+			#print "breaking here, same id!";
  			continue;
 		}		
 
@@ -152,9 +152,13 @@ function importPhengPosts( $link )
 		$vid_row = mysqli_fetch_row($res);
 		$uid = $vid_row[0];
 
+		$res = mysqli_query($link, "SELECT uid  FROM users WHERE name='" . $daten["lastposter"] ."'");
+		$vid_row = mysqli_fetch_row($res);
+		$lastposter_uid = $vid_row[0];
 		#print $uid;
 
 		$minID = $daten["minid"];
+		$replies = $daten["replies"];
 		
 		$res = mysqli_query($link, "SELECT message FROM pheng_posts WHERE id='" . $minID ."'");
 		
@@ -214,8 +218,8 @@ function importPhengPosts( $link )
 
 	 		$last_comment_timestamp = $lastChanged;
 			$last_comment_name = "NULL";
-			$last_comment_uid = $uid;
-			$comment_count = "0";
+			$last_comment_uid = $lastposter_uid;
+			$comment_count = $replies;
 
 			$sql ="INSERT INTO node_comment_statistics VALUES('" . $nid.  "','" . $last_comment_timestamp  . "','" . $last_comment_name . "','" . $last_comment_uid . "','" . $comment_count . "')";
 			#print $sql;
@@ -240,7 +244,7 @@ function importPhengPosts( $link )
 
 
 #importPhengUser( $link );
-#importPhengPosts( $link );
+importPhengPosts( $link );
 importPhengComments( $link );
 
 
