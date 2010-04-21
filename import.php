@@ -24,6 +24,15 @@ function getTIDbyString( $string, $link ){
 }
 
 
+function replaceMarkup( $string  ){
+	$string = preg_replace( "/\[b\]/","<strong>", $string);
+	$string = preg_replace( "/\[\/b\]/","</strong>", $string);
+	$string = preg_replace( "/\[url\](.*)\[\/url\]/","<a href=$1>$1</a>", $string);
+	$string = preg_replace( "/\[url=(.*)\](.*)\[\/url\]/","<a href=$1>$1</a>", $string);
+	
+	return $string;
+}
+
 function importPhengUser( $link )
 {
 	mysqli_query($link, "delete from users where uid > 5");
@@ -75,7 +84,10 @@ function importPhengComments( $link )
  			continue;
 		}		
 
-		$comment = mysqli_real_escape_string($link, $daten["message"] );
+		$comment = replaceMarkup( $daten["message"] );
+		$comment = mysqli_real_escape_string($link, $comment );
+		
+
     		$poster = $daten["poster"];
 		$name = $poster;
 				
@@ -170,8 +182,9 @@ function importPhengPosts( $link )
 		$res = mysqli_query($link, "SELECT message FROM pheng_posts WHERE id='" . $minID ."'");
 		
 		$vid_row = mysqli_fetch_row($res);
-		$body = mysqli_real_escape_string( $link,  $vid_row[0]);
-
+		
+		$body = replaceMarkup( $vid_row[0] );
+		$body = mysqli_real_escape_string( $link,  $body);
 
 
 			
@@ -251,7 +264,7 @@ function importPhengPosts( $link )
 
 
 #importPhengUser( $link );
-#importPhengPosts( $link );
+importPhengPosts( $link );
 importPhengComments( $link );
 
 
